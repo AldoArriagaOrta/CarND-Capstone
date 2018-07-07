@@ -11,7 +11,7 @@ class TLClassifier(object):
         #TODO load classifier
         #PATH_TO_MODEL = 'frozen_inference_graph.pb' #load ssd_inception_v2_coco classifier retrained with Bosch traffic light dataset
         #PATH_TO_MODEL = '/mnt/c/users/Aldo/CarND-capstone/ros/src/tl_detector/light_classification/frozen_inference_graph.pb'
-        PATH_TO_MODEL = os.path.dirname(os.path.realpath(__file__))+'/frozen_inference_graph.pb'
+        PATH_TO_MODEL = os.path.dirname(os.path.realpath(__file__))+'/frozen_inference_graph_test.pb'
         # Create a label dictionary
         item_green = {'id': 1, 'name': u'GREEN'}
         item_red = {'id': 2, 'name': u'RED'}
@@ -20,6 +20,7 @@ class TLClassifier(object):
         self.label_dict = {1: item_green, 2: item_red, 3: item_yellow}
         self.detection_graph = tf.Graph()
 
+        # Based mostly in the object detection API tutorial
         with self.detection_graph.as_default():
             od_graph_def = tf.GraphDef()
             # Works up to here.
