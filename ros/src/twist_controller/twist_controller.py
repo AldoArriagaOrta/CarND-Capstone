@@ -58,7 +58,7 @@ class Controller(object):
         if linear_vel <= 5. and f_current_vel < 5:
             throttle = 0.
             brake = 700 #Braking torque in Nm when desired velocity is zero (to hold the car in position)
-        elif throttle < 0.1 and vel_error < 0.:
+        elif throttle < 0.05 and vel_error < 0.:
             throttle = 0.
             decel = max(vel_error, self.decel_limit)
             brake = abs(decel) * self.vehicle_mass * self.wheel_radius # Braking torque in Nm

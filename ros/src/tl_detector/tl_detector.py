@@ -12,7 +12,7 @@ import cv2
 import yaml
 from scipy.spatial import KDTree
 
-STATE_COUNT_THRESHOLD = 1
+STATE_COUNT_THRESHOLD = 3
 
 class TLDetector(object):
     def __init__(self):
@@ -24,6 +24,7 @@ class TLDetector(object):
         self.waypoints_2d = None
         self.waypoint_tree = None
         self.camera_image = None
+        self.has_image = False
         self.lights = []
 
         sub1 = rospy.Subscriber('/current_pose', PoseStamped, self.pose_cb)
@@ -53,8 +54,15 @@ class TLDetector(object):
         self.last_wp = -1
         self.state_count = 0
 
-        rospy.spin()
-
+        #rospy.spin()
+        self.loop() #we change spin to loop to have control over the update frequency
+        
+    def loop (self):
+        rate = rospy.Rate(5)
+        while not rospy.is_shutdown():
+            self.image_processing()
+            rate.sleep()
+            
     def pose_cb(self, msg):
         self.pose = msg
 
@@ -66,8 +74,12 @@ class TLDetector(object):
 
     def traffic_cb(self, msg):
         self.lights = msg.lights
+        
+    def image_cb(self,msg):
+        self.has_image = True
+        self.camera_image = msg
 
-    def image_cb(self, msg):
+    def image_processing(self):
         """Identifies red lights in the incoming camera image and publishes the index
             of the waypoint closest to the red light's stop line to /traffic_waypoint
 
@@ -75,10 +87,8 @@ class TLDetector(object):
             msg (Image): image from car-mounted camera
 
         """
-        if (self.counter_latency==9):
-            self.counter_latency = 0
-            self.has_image = True
-            self.camera_image = msg
+        if (self.counter_latency==0):
+            self.counter_latency = 0            
             light_wp, state = self.process_traffic_lights()
 
             '''
@@ -100,6 +110,7 @@ class TLDetector(object):
             self.state_count += 1
         else:
             self.counter_latency +=1
+        self.has_image=False
 
     def get_closest_waypoint(self, x, y):
         """Identifies the closest path waypoint to the given position
