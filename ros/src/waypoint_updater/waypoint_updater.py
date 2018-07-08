@@ -23,7 +23,7 @@ as well as to verify your TL classifier.
 TODO (for Yousuf and Aaron): Stopline location for each traffic light.
 '''
 
-LOOKAHEAD_WPS = 200 # Number of waypoints we will publish. You can change this number
+LOOKAHEAD_WPS = 30 # Number of waypoints we will publish. You can change this number
 MAX_DECEL = 0.5
 
 class WaypointUpdater(object):
@@ -47,10 +47,9 @@ class WaypointUpdater(object):
         self.waypoint_tree = None
         self.stopline_wp_index = -1
 
-        #rospy.spin()
-        self.loop() #we change spin with loop to have control over the update frequency
+        self.loop() #we change spin to loop to have control over the update frequency
 
-    #Based on the code explained in the first walkthrough video
+    #Based on the walkthrough videos
     def loop (self):
         rate = rospy.Rate(50)
         while not rospy.is_shutdown():
@@ -81,11 +80,6 @@ class WaypointUpdater(object):
             closest_index = (closest_index + 1 ) % len(self.waypoints_2d)
         return closest_index
 
-    # def publish_waypoints (self, closest_index):
-    #     lane = Lane()
-    #     lane.header = self.base_waypoints.header
-    #     lane.waypoints = self.base_waypoints.waypoints[closest_index : closest_index + LOOKAHEAD_WPS]
-    #     self.final_waypoints_pub.publish(lane)
     def publish_waypoints (self):
         lane = self.generate_lane()
         self.final_waypoints_pub.publish(lane)
@@ -110,9 +104,8 @@ class WaypointUpdater(object):
 
             stop_index = max(self.stopline_wp_index - closest_index - 2, 0)
             distance = self.distance(waypoints, i, stop_index)
-            velocity = math.sqrt(MAX_DECEL * distance)#distance/math.sqrt(1+distance*distance)
-            #velocity = 2*waypoint.twist.twist.linear.x*(( 1./(1. + MAX_DECEL*math.exp(-distance))))
-            if velocity < 3. :
+            velocity = waypoint.twist.twist.linear.x* math.exp(-distance*MAX_DECEL)#math.sqrt(10 * MAX_DECEL * distance)
+            if velocity < 5. and self.stopline_wp_index != -1:
                 velocity = 0.
             point.twist.twist.linear.x = min(velocity, waypoint.twist.twist.linear.x) #respecting speed limit
             temp.append(point)

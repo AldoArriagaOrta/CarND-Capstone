@@ -16,7 +16,6 @@ MAX_DECEL = 1.0
 
 
 class WaypointLoader(object):
-
     def __init__(self):
         rospy.init_node('waypoint_loader', log_level=rospy.DEBUG)
 
@@ -58,7 +57,7 @@ class WaypointLoader(object):
 
     def distance(self, p1, p2):
         x, y, z = p1.x - p2.x, p1.y - p2.y, p1.z - p2.z
-        return math.sqrt(x*x + y*y + z*z)
+        return math.sqrt(x * x + y * y + z * z)
 
     def decelerate(self, waypoints):
         last = waypoints[-1]
@@ -72,11 +71,15 @@ class WaypointLoader(object):
         return waypoints
 
     def publish(self, waypoints):
+        # rate = rospy.Rate(1)
+        # while not rospy.is_shutdown:
         lane = Lane()
         lane.header.frame_id = '/world'
         lane.header.stamp = rospy.Time(0)
         lane.waypoints = waypoints
         self.pub.publish(lane)
+
+    # rate.sleep()
 
 
 if __name__ == '__main__':

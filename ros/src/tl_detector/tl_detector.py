@@ -75,7 +75,7 @@ class TLDetector(object):
             msg (Image): image from car-mounted camera
 
         """
-        if (self.counter_latency==11):
+        if (self.counter_latency==9):
             self.counter_latency = 0
             self.has_image = True
             self.camera_image = msg
